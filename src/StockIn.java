@@ -18,6 +18,9 @@ public class StockIn extends javax.swing.JFrame {
         initComponents();
         setLocationRelativeTo(null);
     }
+    public class App {
+    public static InventoryFrame inventoryFrame = new InventoryFrame();
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -311,33 +314,27 @@ public class StockIn extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jPanel7AncestorAdded
 
-    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-        StockIn stock = new StockIn();
-    stock.setVisible(true);
-
-    this.dispose();
-    }//GEN-LAST:event_jButton6ActionPerformed
-
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        Sales sales = new Sales();
-    sales.setVisible(true);
-
+        new Sales().setVisible(true);
     this.dispose();
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-       InventoryFrame inv = new InventoryFrame();
-    inv.setVisible(true);
-
-    this.dispose();
+         App.inventoryFrame.setVisible(true);
+this.dispose();
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        Dashboard db = new Dashboard();
-    db.setVisible(true);
-
+         new Dashboard().setVisible(true);
     this.dispose();
     }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        StockIn stock = new StockIn();
+        stock.setVisible(true);
+
+        this.dispose();
+    }//GEN-LAST:event_jButton6ActionPerformed
 
     /**
      * @param args the command line arguments

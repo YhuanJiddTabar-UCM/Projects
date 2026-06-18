@@ -7,6 +7,10 @@
  *
  * @author Mardvicz
  */
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
 public class Dashboard extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Dashboard.class.getName());
@@ -15,9 +19,64 @@ public class Dashboard extends javax.swing.JFrame {
      * Creates new form Dashboard
      */
     public Dashboard() {
-        initComponents();
-        setLocationRelativeTo(null);
+    initComponents();
+    setLocationRelativeTo(null);
+    loadDashboardData();
     }
+    public void loadDashboardData() {
+    try (Connection conn = DBConnection.getConnection()) {
+
+        // Total Products
+        jLabel2.setText(getSingleValue(conn,
+                "SELECT COUNT(*) FROM products"));
+
+        // Total Revenue
+        // Total Revenue
+        jLabel11.setText(formatDouble(conn,
+        "SELECT COALESCE(SUM(total_amount),0) FROM sales"));
+
+        // Cost of Goods
+        jLabel12.setText(formatDouble(conn,
+                "SELECT COALESCE(SUM(buy_price * stock),0) FROM products"));
+
+        // Stock Value Retail
+        jLabel10.setText(formatDouble(conn,
+                "SELECT COALESCE(SUM(sell_price * stock),0) FROM products"));
+
+        // Stock Value Cost
+        jLabel9.setText(formatDouble(conn,
+                "SELECT COALESCE(SUM(buy_price * stock),0) FROM products"));
+
+        // Gross Profit
+        jLabel13.setText(formatDouble(conn,
+                "SELECT COALESCE(SUM((sell_price - buy_price) * stock),0) FROM products"));
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+}
+
+private String getSingleValue(Connection conn, String sql) throws Exception {
+    try (PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        return rs.next() ? String.valueOf(rs.getInt(1)) : "0";
+    }
+}
+
+private String formatDouble(Connection conn, String sql) throws Exception {
+    try (PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        double val = 0;
+
+        if (rs.next()) {
+            val = rs.getDouble(1);
+        }
+
+        return String.format("₱%,.2f", val);
+    }
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -61,7 +120,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         jLabel1.setFont(new java.awt.Font("Berlin Sans FB", 0, 36)); // NOI18N
         jLabel1.setText("Store Overview");
-        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 320, -1, -1));
+        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 310, -1, -1));
 
         jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
@@ -262,7 +321,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         jLabel14.setFont(new java.awt.Font("Berlin Sans FB", 0, 36)); // NOI18N
         jLabel14.setText("Financial Summary");
-        jPanel1.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 20, -1, -1));
+        jPanel1.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 30, -1, -1));
 
         jButton3.setBackground(new java.awt.Color(255, 204, 153));
         jButton3.setFont(new java.awt.Font("Berlin Sans FB", 0, 24)); // NOI18N
@@ -310,34 +369,26 @@ public class Dashboard extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-    Dashboard db = new Dashboard();
-    db.setVisible(true);
-
-    this.dispose();       
-    }//GEN-LAST:event_jButton3ActionPerformed
-
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-    InventoryFrame inv = new InventoryFrame();
-    inv.setVisible(true);
-
+    new InventoryFrame().setVisible(true);
     this.dispose();
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
       
-    Sales sales = new Sales();
-    sales.setVisible(true);
-
+     new Sales().setVisible(true);
     this.dispose();
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-    StockIn stock = new StockIn();
-    stock.setVisible(true);
-
+     new StockIn().setVisible(true);
     this.dispose();
     }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        new Dashboard().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
      * @param args the command line arguments
