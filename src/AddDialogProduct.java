@@ -81,6 +81,7 @@ public class AddDialogProduct extends javax.swing.JDialog {
 
         jTextField2.setBackground(new java.awt.Color(255, 242, 217));
         jTextField2.setCursor(new java.awt.Cursor(java.awt.Cursor.WAIT_CURSOR));
+        jTextField2.addActionListener(this::jTextField2ActionPerformed);
 
         jTextField3.setBackground(new java.awt.Color(255, 242, 217));
         jTextField3.setCursor(new java.awt.Cursor(java.awt.Cursor.WAIT_CURSOR));
@@ -320,6 +321,10 @@ public class AddDialogProduct extends javax.swing.JDialog {
               dispose();
 
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField2ActionPerformed
 
     /**
      * @param args the command line arguments

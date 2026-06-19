@@ -21,141 +21,145 @@ public class InventoryFrame extends javax.swing.JFrame {
     private JTable table;
 
     public InventoryFrame() {
-    initComponents();
-    setLocationRelativeTo(null);
+        initComponents();
+        setLocationRelativeTo(null);
 
-    Connection conn = DBConnection.getConnection();
-
-    if (conn != null) {
-        System.out.println("✅ DATABASE CONNECTED");
-    } else {
-        System.out.println("❌ DATABASE FAILED");
-    }
-
-    tableModel = new DefaultTableModel(
+        // TABLE MODEL (must match DB order)
+        tableModel = new DefaultTableModel(
             new Object[]{
-                    "Product",
-                    "Category",
-                    "Unit",
-                    "Buy Price",
-                    "Sell Price",
-                    "Stock",
-                    "Low Alert",
-                    "Supplier",
-                    "Date Restocked"
+                "ID",
+                "Product",
+                "Category",
+                "Unit",
+                "Buy Price",
+                "Sell Price",
+                "Stock",
+                "Low Alert",
+                "Supplier",
+                "Date Restocked"
             }, 0
-    );
+        );
 
-    table = new JTable(tableModel);
-JScrollPane scrollPane = new JScrollPane(table);
+        // SINGLE TABLE INSTANCE
+        table = new JTable(tableModel);
 
-    jPanel4.setLayout(new java.awt.BorderLayout());
-    jPanel4.add(scrollPane, java.awt.BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(table);
 
-    jPanel4.revalidate();
-    jPanel4.repaint();
+        // attach to panel
+        jPanel4.setLayout(new java.awt.BorderLayout());
+        jPanel4.add(scrollPane, java.awt.BorderLayout.CENTER);
 
-    // Load saved products from database
-    loadProducts();
+        loadProducts();
 }
+    
     private void loadProducts() {
 
     try {
-        Connection conn = DBConnection.getConnection();
+            Connection conn = DBConnection.getConnection();
 
-        String sql = "SELECT * FROM products";
+            String sql = "SELECT * FROM products";
+            PreparedStatement pst = conn.prepareStatement(sql);
+            java.sql.ResultSet rs = pst.executeQuery();
 
-        PreparedStatement pst = conn.prepareStatement(sql);
-        java.sql.ResultSet rs = pst.executeQuery();
+            tableModel.setRowCount(0);
 
-        // Clear table before loading
-        tableModel.setRowCount(0);
-
-        while (rs.next()) {
-
-            tableModel.addRow(new Object[]{
+            while (rs.next()) {
+                tableModel.addRow(new Object[]{
+                    rs.getInt("id"),
                     rs.getString("product_name"),
                     rs.getString("category"),
-                    rs.getString("unit"),
+                    rs.getInt("unit"),
                     rs.getDouble("buy_price"),
                     rs.getDouble("sell_price"),
                     rs.getInt("stock"),
                     rs.getInt("low_alert"),
                     rs.getString("supplier"),
                     rs.getString("date_restocked")
-            });
+                });
+            }
+
+            rs.close();
+            pst.close();
+            conn.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        rs.close();
-        pst.close();
-        conn.close();
-
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
 }
 
         public void addProductToTable(
-        String product,
-        String category,
-        String unit,
-        String buy,
-        String sell,
-        String stock,
-        String lowAlert,
-        String supplier,
-        String date
-) {
+            String product,
+            String category,
+            String unit,
+            String buy,
+            String sell,
+            String stock,
+            String lowAlert,
+            String supplier,
+            String date
+    ) {
+        try {
+            Connection conn = DBConnection.getConnection();
 
-    // 1. JTable update
-    tableModel.addRow(new Object[]{
-            product,
-            category,
-            unit,
-            buy,
-            sell,
-            stock,
-            lowAlert,
-            supplier,
-            date
-    });
+            String sql = "INSERT INTO products "
+                    + "(product_name, category, unit, buy_price, sell_price, stock, low_alert, supplier, date_restocked) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    // 2. Database insert
-    try {
-        Connection conn = DBConnection.getConnection();
+            PreparedStatement pst = conn.prepareStatement(sql);
 
-if (conn == null) {
-    System.out.println("Connection is NULL - fix DB first!");
-    return;
-}
+            pst.setString(1, product);
+            pst.setString(2, category);
+            pst.setString(3, unit);
+            pst.setDouble(4, buy.isEmpty() ? 0 : Double.parseDouble(buy));
+            pst.setDouble(5, sell.isEmpty() ? 0 : Double.parseDouble(sell));
+            pst.setInt(6, stock.isEmpty() ? 0 : Integer.parseInt(stock));
+            pst.setInt(7, lowAlert.isEmpty() ? 0 : Integer.parseInt(lowAlert));
+            pst.setString(8, supplier);
+            pst.setString(9, date);
 
-// SAFE TO CONTINUE ONLY IF conn is NOT null
-String sql = "INSERT INTO products (product_name, category, unit, buy_price, sell_price, stock, low_alert, supplier, date_restocked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            pst.executeUpdate();
 
-PreparedStatement pst = conn.prepareStatement(sql);
+            pst.close();
+            conn.close();
 
-        pst.setString(1, product);
-        pst.setString(2, category);
-        pst.setString(3, unit);
-        pst.setDouble(4, buy.isEmpty() ? 0 : Double.parseDouble(buy));
-pst.setDouble(5, sell.isEmpty() ? 0 : Double.parseDouble(sell));
-pst.setInt(6, stock.isEmpty() ? 0 : Integer.parseInt(stock));
-pst.setInt(7, lowAlert.isEmpty() ? 0 : Integer.parseInt(lowAlert));
-        pst.setString(8, supplier);
-        pst.setString(9, date);
+            // refresh table AFTER insert (best practice)
+            loadProducts();
 
-        int rows = pst.executeUpdate();
-
-        System.out.println("Inserted rows: " + rows);
-
-        pst.close();
-        conn.close();
-
-    } catch (Exception e) {
-        e.printStackTrace(); // IMPORTANT (better than your current logging)
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-    
-}
+        private void deleteSelectedProduct() {
+        int row = table.getSelectedRow();
+
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Select a product first.");
+            return;
+        }
+
+        int id = Integer.parseInt(table.getValueAt(row, 0).toString());
+
+        try {
+            Connection conn = DBConnection.getConnection();
+
+            String sql = "DELETE FROM products WHERE id = ?";
+            PreparedStatement pst = conn.prepareStatement(sql);
+
+            pst.setInt(1, id);
+            pst.executeUpdate();
+
+            pst.close();
+            conn.close();
+
+            loadProducts();
+
+            JOptionPane.showMessageDialog(this, "Product deleted.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+        
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -176,6 +180,7 @@ pst.setInt(7, lowAlert.isEmpty() ? 0 : Integer.parseInt(lowAlert));
         jButton6 = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         jButton2 = new javax.swing.JButton();
+        jButton7 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(249, 226, 209));
@@ -289,6 +294,13 @@ pst.setInt(7, lowAlert.isEmpty() ? 0 : Integer.parseInt(lowAlert));
         jButton2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButton2.addActionListener(this::jButton2ActionPerformed);
 
+        jButton7.setBackground(new java.awt.Color(204, 102, 0));
+        jButton7.setFont(new java.awt.Font("Berlin Sans FB", 0, 14)); // NOI18N
+        jButton7.setForeground(new java.awt.Color(255, 255, 255));
+        jButton7.setText("Edit Product");
+        jButton7.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jButton7.addActionListener(this::jButton7ActionPerformed);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -299,6 +311,8 @@ pst.setInt(7, lowAlert.isEmpty() ? 0 : Integer.parseInt(lowAlert));
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel14)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -325,7 +339,8 @@ pst.setInt(7, lowAlert.isEmpty() ? 0 : Integer.parseInt(lowAlert));
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel14)
                     .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -380,6 +395,7 @@ pst.setInt(7, lowAlert.isEmpty() ? 0 : Integer.parseInt(lowAlert));
         dialog.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         
     }//GEN-LAST:event_jButton4ActionPerformed
@@ -431,6 +447,50 @@ pst.setInt(7, lowAlert.isEmpty() ? 0 : Integer.parseInt(lowAlert));
     }
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+       int row = table.getSelectedRow();
+
+    if (row == -1) {
+        JOptionPane.showMessageDialog(this,
+                "Please select a product to edit.");
+        return;
+    }
+
+    // Get values from table
+    int id = Integer.parseInt(table.getValueAt(row, 0).toString());
+    String product = table.getValueAt(row, 1).toString();
+    String category = table.getValueAt(row, 2).toString();
+    String unit = table.getValueAt(row, 3).toString();
+    String buyPrice = table.getValueAt(row, 4).toString();
+    String sellPrice = table.getValueAt(row, 5).toString();
+    String stock = table.getValueAt(row, 6).toString();
+    String lowAlert = table.getValueAt(row, 7).toString();
+    String supplier = table.getValueAt(row, 8).toString();
+    String date = table.getValueAt(row, 9).toString();
+
+    // Open edit dialog
+    EditProduct dialog = new EditProduct(this, true);
+
+    dialog.setProductData(
+            id,
+            product,
+            category,
+            unit,
+            buyPrice,
+            sellPrice,
+            stock,
+            lowAlert,
+            supplier,
+            date
+    );
+
+    dialog.setLocationRelativeTo(this);
+    dialog.setVisible(true);
+
+    // Refresh table after closing dialog
+    loadProducts();
+    }//GEN-LAST:event_jButton7ActionPerformed
+
     
     
     public static void main(String args[]) {
@@ -445,6 +505,7 @@ pst.setInt(7, lowAlert.isEmpty() ? 0 : Integer.parseInt(lowAlert));
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;

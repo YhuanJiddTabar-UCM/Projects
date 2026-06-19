@@ -7,17 +7,53 @@
  *
  * @author Mardvicz
  */
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import javax.swing.JOptionPane;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+
 public class EditProduct extends javax.swing.JDialog {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(EditProduct.class.getName());
+       private int productId;
+       private static final Logger logger = Logger.getLogger(EditProduct.class.getName());
+       
+   
 
     /**
      * Creates new form EditProduct
      */
+    
     public EditProduct(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
     }
+    // PUT IT HERE
+    public void setProductData(
+            int id,
+            String product,
+            String category,
+            String unit,
+            String buyPrice,
+            String sellPrice,
+            String stock,
+            String lowAlert,
+            String supplier,
+            String dateRestocked) {
+
+        productId = id;
+
+        jTextField5.setText(product);
+        jTextField11.setText(category);
+        jTextField12.setText(unit);
+        jTextField13.setText(buyPrice);
+        jTextField15.setText(sellPrice);
+        jTextField14.setText(stock);
+        jTextField16.setText(lowAlert);
+        jTextField17.setText(supplier);
+        jTextField18.setText(dateRestocked);
+    }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -341,12 +377,14 @@ public class EditProduct extends javax.swing.JDialog {
         jButton3.setForeground(new java.awt.Color(255, 255, 255));
         jButton3.setText("Save Changes");
         jButton3.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jButton3.addActionListener(this::jButton3ActionPerformed);
 
         jButton4.setBackground(new java.awt.Color(204, 102, 0));
         jButton4.setFont(new java.awt.Font("Berlin Sans FB", 0, 13)); // NOI18N
         jButton4.setForeground(new java.awt.Color(255, 255, 255));
         jButton4.setText("Cancel");
         jButton4.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jButton4.addActionListener(this::jButton4ActionPerformed);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -486,6 +524,48 @@ public class EditProduct extends javax.swing.JDialog {
     private void jTextField12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField12ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField12ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        try (Connection conn = DBConnection.getConnection();
+         PreparedStatement pst = conn.prepareStatement("""
+            UPDATE products SET
+                product_name = ?,
+                category = ?,
+                unit = ?,
+                buy_price = ?,
+                sell_price = ?,
+                stock = ?,
+                low_alert = ?,
+                supplier = ?,
+                date_restocked = ?
+            WHERE id = ?
+        """)) {
+
+        pst.setString(1, jTextField5.getText().trim());
+        pst.setString(2, jTextField11.getText().trim());
+        pst.setString(3, jTextField12.getText().trim());
+        pst.setDouble(4, Double.parseDouble(jTextField13.getText().trim()));
+        pst.setDouble(5, Double.parseDouble(jTextField15.getText().trim()));
+        pst.setInt(6, Integer.parseInt(jTextField14.getText().trim()));
+        pst.setInt(7, Integer.parseInt(jTextField16.getText().trim()));
+        pst.setString(8, jTextField17.getText().trim());
+        pst.setString(9, jTextField18.getText().trim());
+        pst.setInt(10, productId);
+
+        pst.executeUpdate();
+
+        JOptionPane.showMessageDialog(this, "Product updated!");
+        dispose();
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Update failed: " + e.getMessage());
+    }
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+       dispose();
+    }//GEN-LAST:event_jButton4ActionPerformed
 
     /**
      * @param args the command line arguments

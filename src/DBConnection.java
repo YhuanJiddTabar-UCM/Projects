@@ -1,21 +1,21 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
+    import java.sql.Connection;
+    import java.sql.DriverManager;
 
-public class DBConnection {
+    public class DBConnection {
 
-    public static Connection getConnection() {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
+        public static Connection getConnection() {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
 
-            return DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/inventorysystem",
-                    "root",
-                    ""
-            );
+                return DriverManager.getConnection(
+                        "jdbc:mysql://localhost:3306/inventorysystem",
+                        "root",
+                        ""
+                );
 
-        } catch (Exception e) {
-            System.out.println("DB Connection Error: " + e.getMessage());
-            return null;
+            } catch (Exception e) {
+                System.out.println("DB Connection Error: " + e.getMessage());
+                return null;
+            }
         }
-    }
-}   
+    }   

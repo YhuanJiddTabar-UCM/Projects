@@ -127,6 +127,7 @@ private String formatDouble(Connection conn, String sql) throws Exception {
         jLabel3.setFont(new java.awt.Font("Berlin Sans FB", 0, 24)); // NOI18N
         jLabel3.setText("STOCK VALUE RETAIL");
 
+        jLabel10.setFont(new java.awt.Font("Berlin Sans FB", 0, 18)); // NOI18N
         jLabel10.setText("jLabel2");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -150,7 +151,7 @@ private String formatDouble(Connection conn, String sql) throws Exception {
                 .addComponent(jLabel3)
                 .addGap(41, 41, 41)
                 .addComponent(jLabel10)
-                .addContainerGap(70, Short.MAX_VALUE))
+                .addContainerGap(65, Short.MAX_VALUE))
         );
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(760, 380, 290, 170));
@@ -160,6 +161,7 @@ private String formatDouble(Connection conn, String sql) throws Exception {
         jLabel5.setFont(new java.awt.Font("Berlin Sans FB", 0, 24)); // NOI18N
         jLabel5.setText("COST OF GOODS");
 
+        jLabel12.setFont(new java.awt.Font("Berlin Sans FB", 0, 18)); // NOI18N
         jLabel12.setText("jLabel2");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -182,7 +184,7 @@ private String formatDouble(Connection conn, String sql) throws Exception {
                 .addComponent(jLabel5)
                 .addGap(40, 40, 40)
                 .addComponent(jLabel12)
-                .addContainerGap(70, Short.MAX_VALUE))
+                .addContainerGap(65, Short.MAX_VALUE))
         );
 
         jPanel1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 90, 300, 170));
@@ -192,6 +194,7 @@ private String formatDouble(Connection conn, String sql) throws Exception {
         jLabel6.setFont(new java.awt.Font("Berlin Sans FB", 0, 24)); // NOI18N
         jLabel6.setText("GROSS PROFIT");
 
+        jLabel13.setFont(new java.awt.Font("Berlin Sans FB", 0, 18)); // NOI18N
         jLabel13.setText("jLabel2");
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
@@ -215,7 +218,7 @@ private String formatDouble(Connection conn, String sql) throws Exception {
                 .addComponent(jLabel6)
                 .addGap(38, 38, 38)
                 .addComponent(jLabel13)
-                .addContainerGap(73, Short.MAX_VALUE))
+                .addContainerGap(68, Short.MAX_VALUE))
         );
 
         jPanel1.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(760, 90, 280, 170));
@@ -225,6 +228,7 @@ private String formatDouble(Connection conn, String sql) throws Exception {
         jLabel4.setFont(new java.awt.Font("Berlin Sans FB", 0, 24)); // NOI18N
         jLabel4.setText("TOTAL PRODUCTS");
 
+        jLabel2.setFont(new java.awt.Font("Berlin Sans FB", 0, 18)); // NOI18N
         jLabel2.setText("jLabel2");
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
@@ -248,7 +252,7 @@ private String formatDouble(Connection conn, String sql) throws Exception {
                 .addComponent(jLabel4)
                 .addGap(32, 32, 32)
                 .addComponent(jLabel2)
-                .addContainerGap(71, Short.MAX_VALUE))
+                .addContainerGap(66, Short.MAX_VALUE))
         );
 
         jPanel1.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 380, 300, 170));
@@ -258,6 +262,7 @@ private String formatDouble(Connection conn, String sql) throws Exception {
         jLabel7.setFont(new java.awt.Font("Berlin Sans FB", 0, 24)); // NOI18N
         jLabel7.setText("TOTAL REVENUE");
 
+        jLabel11.setFont(new java.awt.Font("Berlin Sans FB", 0, 18)); // NOI18N
         jLabel11.setText("jLabel2");
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
@@ -281,7 +286,7 @@ private String formatDouble(Connection conn, String sql) throws Exception {
                 .addComponent(jLabel7)
                 .addGap(37, 37, 37)
                 .addComponent(jLabel11)
-                .addContainerGap(70, Short.MAX_VALUE))
+                .addContainerGap(65, Short.MAX_VALUE))
         );
 
         jPanel1.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 90, 300, 170));
@@ -291,6 +296,7 @@ private String formatDouble(Connection conn, String sql) throws Exception {
         jLabel8.setFont(new java.awt.Font("Berlin Sans FB", 0, 24)); // NOI18N
         jLabel8.setText("STOCK VALUE COST");
 
+        jLabel9.setFont(new java.awt.Font("Berlin Sans FB", 0, 18)); // NOI18N
         jLabel9.setText("jLabel2");
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
@@ -314,7 +320,7 @@ private String formatDouble(Connection conn, String sql) throws Exception {
                 .addComponent(jLabel8)
                 .addGap(34, 34, 34)
                 .addComponent(jLabel9)
-                .addContainerGap(72, Short.MAX_VALUE))
+                .addContainerGap(67, Short.MAX_VALUE))
         );
 
         jPanel1.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 380, 300, 170));
