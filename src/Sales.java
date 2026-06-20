@@ -8,6 +8,8 @@ import java.sql.PreparedStatement;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Sales extends javax.swing.JFrame {
     DefaultTableModel cartModel;
@@ -27,6 +29,10 @@ public class Sales extends javax.swing.JFrame {
      public Sales() {
         initComponents();
         setLocationRelativeTo(null);
+        jTextField1.setText(
+    new SimpleDateFormat("MMMM dd, yyyy")
+            .format(new Date())
+);
 
         setupCartTable();
         setupSalesTable();
@@ -158,7 +164,21 @@ public class Sales extends javax.swing.JFrame {
                 pst.setString(6, date);
 
                 pst.addBatch();
-            }
+                String updateStock =
+    "UPDATE products " +
+    "SET stock = stock - ? " +
+    "WHERE product_name = ?";
+
+        PreparedStatement stockPst =
+                conn.prepareStatement(updateStock);
+
+        stockPst.setInt(1, qty);
+        stockPst.setString(2, product);
+
+        stockPst.executeUpdate();
+
+        stockPst.close();
+                    }
 
             pst.executeBatch();
             pst.close();

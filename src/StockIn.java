@@ -7,6 +7,13 @@
  *
  * @author Mardvicz
  */
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import javax.swing.JOptionPane;
+import java.sql.ResultSet;
+import javax.swing.table.DefaultTableModel;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 public class StockIn extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(StockIn.class.getName());
@@ -15,9 +22,108 @@ public class StockIn extends javax.swing.JFrame {
      * Creates new form StockIn
      */
     public StockIn() {
-        initComponents();
-        setLocationRelativeTo(null);
+    initComponents();
+    setLocationRelativeTo(null);
+    jTextField1.setText(
+    new java.text.SimpleDateFormat(
+        "MMMM dd, yyyy"
+    ).format(new java.util.Date())
+);
+
+    loadHistory();
+    updateCapitalSpent();
+}
+    private void loadHistory() {
+
+    try {
+
+        Connection con = DBConnection.getConnection();
+
+        DefaultTableModel model =
+                new DefaultTableModel(
+                        new String[]{
+                            "Product",
+                            "Quantity",
+                            "Buy Price",
+                            "Total Cost",
+                            "Date"
+                        }, 0);
+
+        String sql =
+                "SELECT * FROM restock_history " +
+                "ORDER BY restock_date DESC";
+
+        PreparedStatement pst =
+                con.prepareStatement(sql);
+
+        ResultSet rs = pst.executeQuery();
+
+        while (rs.next()) {
+
+            model.addRow(new Object[]{
+                rs.getString("product_name"),
+                rs.getInt("quantity"),
+                rs.getDouble("buy_price"),
+                rs.getDouble("total_cost"),
+                rs.getTimestamp("restock_date")
+            });
+        }
+
+        jTable1.setModel(model);
+        if (jTable1.getRowCount() > 0) {
+    jTable1.setRowSelectionInterval(0, 0);
+
+    jTable1.scrollRectToVisible(
+        jTable1.getCellRect(0, 0, true)
+    );
+}
+        
+
+        rs.close();
+        pst.close();
+        con.close();
+
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+}
+
+private void updateCapitalSpent() {
+
+    try {
+
+        Connection con = DBConnection.getConnection();
+
+        String sql =
+                "SELECT SUM(total_cost) AS total " +
+                "FROM restock_history";
+
+        PreparedStatement pst =
+                con.prepareStatement(sql);
+
+        ResultSet rs = pst.executeQuery();
+
+        if (rs.next()) {
+
+            double total = rs.getDouble("total");
+
+            if(rs.wasNull()) {
+                total = 0;
+            }
+
+            jLabel7.setText(
+                    "₱" + String.format("%.2f", total)
+            );
+        }
+
+        rs.close();
+        pst.close();
+        con.close();
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
     public class App {
     public static InventoryFrame inventoryFrame = new InventoryFrame();
 }
@@ -46,13 +152,13 @@ public class StockIn extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        jPanel11 = new javax.swing.JPanel();
-        jLabel6 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -81,12 +187,15 @@ public class StockIn extends javax.swing.JFrame {
         jButton2.setForeground(new java.awt.Color(255, 255, 255));
         jButton2.setText("+ Add Restock Entry");
         jButton2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jButton2.addActionListener(this::jButton2ActionPerformed);
 
         jLabel3.setFont(new java.awt.Font("Berlin Sans FB", 0, 14)); // NOI18N
         jLabel3.setText("Product");
 
         jLabel5.setFont(new java.awt.Font("Berlin Sans FB", 0, 14)); // NOI18N
         jLabel5.setText("Quantity");
+
+        jSpinner2.setModel(new javax.swing.SpinnerNumberModel(0.0d, null, null, 0.1d));
 
         jLabel8.setFont(new java.awt.Font("Berlin Sans FB", 0, 14)); // NOI18N
         jLabel8.setText("Cost/Price");
@@ -199,26 +308,6 @@ public class StockIn extends javax.swing.JFrame {
                 .addContainerGap(47, Short.MAX_VALUE))
         );
 
-        jLabel6.setFont(new java.awt.Font("Berlin Sans FB", 0, 14)); // NOI18N
-        jLabel6.setText("Restock History");
-
-        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
-        jPanel11.setLayout(jPanel11Layout);
-        jPanel11Layout.setHorizontalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel11Layout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addComponent(jLabel6)
-                .addContainerGap(396, Short.MAX_VALUE))
-        );
-        jPanel11Layout.setVerticalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel11Layout.createSequentialGroup()
-                .addGap(31, 31, 31)
-                .addComponent(jLabel6)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
         jLabel2.setFont(new java.awt.Font("Berlin Sans FB", 0, 36)); // NOI18N
         jLabel2.setText("SALES LOG");
 
@@ -250,15 +339,25 @@ public class StockIn extends javax.swing.JFrame {
         jButton6.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jButton6.addActionListener(this::jButton6ActionPerformed);
 
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(jTable1);
+
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel7Layout.createSequentialGroup()
-                        .addGap(102, 102, 102)
-                        .addComponent(jLabel2))
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addGap(75, 75, 75)
                         .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -267,33 +366,34 @@ public class StockIn extends javax.swing.JFrame {
                                 .addGap(70, 70, 70)
                                 .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(82, 82, 82)
+                        .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel7Layout.createSequentialGroup()
                                 .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(86, 86, 86)
                                 .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel7Layout.createSequentialGroup()
-                                .addGap(28, 28, 28)
-                                .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel7Layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel2)))
                 .addContainerGap(52, Short.MAX_VALUE))
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel7Layout.createSequentialGroup()
-                .addGap(79, 79, 79)
+                .addContainerGap()
                 .addComponent(jLabel2)
-                .addGap(27, 27, 27)
-                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(46, 46, 46)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 526, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(41, 41, 41)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(25, Short.MAX_VALUE))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -336,6 +436,97 @@ this.dispose();
         this.dispose();
     }//GEN-LAST:event_jButton6ActionPerformed
 
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+String product = jComboBox2.getSelectedItem().toString().trim();
+    int quantity = (Integer) jSpinner1.getValue();
+    double buyPrice = ((Number) jSpinner2.getValue()).doubleValue();
+
+    if(product.isEmpty()) {
+        JOptionPane.showMessageDialog(this,
+                "Please select a product.");
+        return;
+    }
+
+    if(quantity <= 0) {
+        JOptionPane.showMessageDialog(this,
+                "Quantity must be greater than 0.");
+        return;
+    }
+
+    try {
+
+        Connection con = DBConnection.getConnection();
+
+        if(con == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Database connection failed.");
+            return;
+        }
+
+        String sql =
+            "UPDATE products " +
+            "SET stock = stock + ?, " +
+            "buy_price = ?, " +
+            "date_restocked = NOW() " +
+            "WHERE product_name = ?";
+
+        PreparedStatement pst =
+                con.prepareStatement(sql);
+
+        pst.setInt(1, quantity);
+        pst.setDouble(2, buyPrice);
+        pst.setString(3, product);
+
+        int rowsAffected = pst.executeUpdate();
+
+        if(rowsAffected > 0) {
+
+            double totalCost = quantity * buyPrice;
+
+            String historySql =
+                    "INSERT INTO restock_history " +
+                    "(product_name, quantity, buy_price, total_cost) " +
+                    "VALUES (?, ?, ?, ?)";
+
+            PreparedStatement historyPst =
+                    con.prepareStatement(historySql);
+
+            historyPst.setString(1, product);
+            historyPst.setInt(2, quantity);
+            historyPst.setDouble(3, buyPrice);
+            historyPst.setDouble(4, totalCost);
+
+            historyPst.executeUpdate();
+            historyPst.close();
+
+            JOptionPane.showMessageDialog(this,
+                    "Restock Successful!");
+
+            jSpinner1.setValue(0);
+            jSpinner2.setValue(0);
+
+            loadHistory();
+            updateCapitalSpent();
+
+        } else {
+
+            JOptionPane.showMessageDialog(this,
+                    "Product not found:\n" + product);
+
+        }
+
+        pst.close();
+        con.close();
+
+    } catch(Exception e) {
+
+        JOptionPane.showMessageDialog(this,
+                "Error: " + e.getMessage());
+
+        e.printStackTrace();
+    }
+    }//GEN-LAST:event_jButton2ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -373,16 +564,16 @@ this.dispose();
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSpinner jSpinner1;
     private javax.swing.JSpinner jSpinner2;
+    private javax.swing.JTable jTable1;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
 }
